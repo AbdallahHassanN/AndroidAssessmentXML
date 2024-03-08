@@ -25,7 +25,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/item" /> <!-- Replace with actual image source -->
+                    android:src="@drawable/item"
+                    android:contentDescription="Item Image" />
 
             </androidx.cardview.widget.CardView>
 
