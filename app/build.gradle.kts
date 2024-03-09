@@ -136,4 +136,7 @@ dependencies {
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
 
+    implementation("com.google.android.material:material:1.0.0")
+
+
 }
