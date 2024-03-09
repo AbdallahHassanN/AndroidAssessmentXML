@@ -6,14 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.ListView
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.technical_assignment.R
 import com.example.technical_assignment_xml.Adapter.ItemAdapter
 import com.example.technical_assignment.databinding.FragmentStoreAppListBinding
+import com.example.technical_assignment_xml.domain.models.StoreItem
 import com.example.technical_assignment_xml.presentation.viewmodels.StoreAppListViewModel
 import com.example.technical_assignment_xml.network.response.Resource
 import com.example.technical_assignment_xml.presentation.common.Constants.TAG
@@ -25,7 +24,8 @@ class StoreAppListFragment : Fragment() {
     private lateinit var binding: FragmentStoreAppListBinding
     lateinit var viewModel: StoreAppListViewModel
     private lateinit var itemAdapter: ItemAdapter
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var listView: ListView
+    private var savedPosition: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,20 +36,29 @@ class StoreAppListFragment : Fragment() {
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("savedPosition", listView.firstVisiblePosition)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setUpListView()
+        savedInstanceState?.let {
+            savedPosition = it.getInt("savedPosition", 0)
+        }
 
-        setUpRecyclerView()
         viewModel.allItems.observe(viewLifecycleOwner) { response ->
             showProgressBar()
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let {
-                        itemAdapter.differ.submitList(it)
+                        itemAdapter = ItemAdapter(it)
+                        listView.adapter = itemAdapter
                     }
                 }
+
                 is Resource.Error -> {
                     response.message?.let { message ->
                         Snackbar.make(
@@ -62,14 +71,31 @@ class StoreAppListFragment : Fragment() {
                 }
 
                 is Resource.Loading -> {
-                    Log.d(TAG,"Loading frag")
+                    Log.d(TAG, "Loading frag")
                     showProgressBar()
                 }
             }
         }
-        itemAdapter.setOnItemClickListener {
+    }
+
+    private fun hideProgressBar() {
+        binding.paginationProgressBar.visibility = View.INVISIBLE
+    }
+
+    private fun showProgressBar() {
+        binding.paginationProgressBar.visibility = View.VISIBLE
+    }
+
+    private fun setUpListView() {
+        listView = binding.listView
+        itemAdapter = ItemAdapter(
+            emptyList()
+        )
+        listView.adapter = itemAdapter
+        listView.setOnItemClickListener { parent, _, position, _ ->
+            val item = parent.getItemAtPosition(position) as StoreItem
             val bundle = Bundle().apply {
-                putParcelable("item", it)
+                putParcelable("item", item)
             }
             findNavController().navigate(
                 R.id.action_storeAppListFragment_to_detailFragment,
@@ -78,25 +104,12 @@ class StoreAppListFragment : Fragment() {
         }
     }
 
-    private fun hideProgressBar() {
-        binding.paginationProgressBar.visibility = View.INVISIBLE
+    override fun onPause() {
+        super.onPause()
+        savedPosition = listView.firstVisiblePosition
     }
-    private fun showProgressBar() {
-        binding.paginationProgressBar.visibility = View.VISIBLE
-    }
-
-    private fun setUpRecyclerView() {
-        recyclerView = binding.rvItems
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2).apply {
-            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return 1
-                }
-            }
-        }
-        itemAdapter = ItemAdapter()
-        binding.rvItems.apply {
-            adapter = itemAdapter
-        }
+    override fun onResume() {
+        super.onResume()
+        listView.setSelection(savedPosition)
     }
 }

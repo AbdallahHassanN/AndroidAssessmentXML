@@ -1,8 +1,11 @@
 package com.example.technical_assignment_xml.Adapter
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -10,50 +13,35 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.technical_assignment.R
 import com.example.technical_assignment_xml.domain.models.StoreItem
+import com.example.technical_assignment_xml.presentation.common.Constants.TAG
 
+class ItemAdapter(private val items: List<StoreItem>) : BaseAdapter() {
 
-class ItemAdapter:RecyclerView.Adapter<ItemAdapter.MyViewHolder>() {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = convertView ?: LayoutInflater.from(parent.context)
+            .inflate(R.layout.store_item, parent, false)
 
-    private val differCallback = object : DiffUtil.ItemCallback<StoreItem>(){
-        override fun areItemsTheSame(oldItem: StoreItem, newItem: StoreItem): Boolean {
-            return oldItem.id == newItem.id
-        }
+        val currentItem = items[position]
 
-        override fun areContentsTheSame(oldItem: StoreItem, newItem: StoreItem): Boolean {
-            return oldItem == newItem
-        }
-    }
-    val differ = AsyncListDiffer(this,differCallback)
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.store_item,parent,false)
-        return MyViewHolder(view)
-    }
+        view.findViewById<TextView>(R.id.itemTitle).text = currentItem.title
+        view.findViewById<TextView>(R.id.itemPrice).text = "Price: ${currentItem.price}$"
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val currentItem = differ.currentList[position]
-        holder.itemView.apply {
-            holder.itemView.findViewById<TextView>(R.id.itemTitle).text = currentItem.title
-            holder.itemView.findViewById<TextView>(R.id.itemPrice).text =
-                "Price: " + currentItem.price.toString() + "$"
-
-            Glide.with(this)
-                .load(currentItem.image)
-                .placeholder(R.drawable.ic_launcher_background)
-                .into(holder.itemView.findViewById(R.id.itemImg))
-            setOnClickListener {
-                onItemClickListener?.let { it(currentItem) }
-            }
-        }
+        Glide.with(view)
+            .load(currentItem.image)
+            .placeholder(R.drawable.ic_launcher_background)
+            .into(view.findViewById(R.id.itemImg))
+        return view
     }
 
-    private var onItemClickListener: ((StoreItem) -> Unit)? = null
-    fun setOnItemClickListener(listener: (StoreItem) -> Unit) {
-        onItemClickListener = listener
-    }
-    override fun getItemCount(): Int {
-        return differ.currentList.size
+    override fun getItem(position: Int): Any {
+        return items[position]
     }
 
-    class MyViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){}
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
+
+    override fun getCount(): Int {
+        return items.size
+    }
 }
