@@ -1,6 +1,7 @@
 package com.example.technical_assignment_xml.presentation.StoreAppListScreen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.example.technical_assignment_xml.Adapter.ItemAdapter
 import com.example.technical_assignment.databinding.FragmentStoreAppListBinding
 import com.example.technical_assignment_xml.presentation.viewmodels.StoreAppListViewModel
 import com.example.technical_assignment_xml.network.response.Resource
+import com.example.technical_assignment_xml.presentation.common.Constants.TAG
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -40,8 +42,10 @@ class StoreAppListFragment : Fragment() {
 
         setUpRecyclerView()
         viewModel.allItems.observe(viewLifecycleOwner) { response ->
+            showProgressBar()
             when (response) {
                 is Resource.Success -> {
+                    hideProgressBar()
                     response.data?.let {
                         itemAdapter.differ.submitList(it)
                     }
@@ -54,9 +58,13 @@ class StoreAppListFragment : Fragment() {
                             Snackbar.LENGTH_SHORT
                         ).show()
                     }
+                    hideProgressBar()
                 }
 
-                is Resource.Loading -> {}
+                is Resource.Loading -> {
+                    Log.d(TAG,"Loading frag")
+                    showProgressBar()
+                }
             }
         }
         itemAdapter.setOnItemClickListener {
@@ -68,6 +76,13 @@ class StoreAppListFragment : Fragment() {
                 bundle
             )
         }
+    }
+
+    private fun hideProgressBar() {
+        binding.paginationProgressBar.visibility = View.INVISIBLE
+    }
+    private fun showProgressBar() {
+        binding.paginationProgressBar.visibility = View.VISIBLE
     }
 
     private fun setUpRecyclerView() {

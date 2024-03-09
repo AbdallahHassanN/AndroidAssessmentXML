@@ -12,15 +12,14 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:titleTextColor="@color/white"
+            android:background="@color/white"
+            app:titleTextColor="@color/black"
             app:title="Detail"
             app:navigationIcon="?attr/homeAsUpIndicator" />
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
             android:src="@drawable/item" />
 
         <TextView

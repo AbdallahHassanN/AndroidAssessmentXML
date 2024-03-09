@@ -27,7 +27,8 @@ class StoreAppListViewModel
         getAllItems()
     }
 
-    fun getAllItems() = viewModelScope.launch {
+    private fun getAllItems() = viewModelScope.launch {
+        allItems.postValue(Resource.Loading())
         getAllItemsUseCase.execute(
         ).catch {
             Log.d(TAG, "Error ${it.message}")

@@ -5,6 +5,18 @@
     android:layout_height="match_parent"
     tools:context="com.example.technical_assignment_xml.presentation.StoreAppListScreen.StoreAppListFragment">
 
+    <ProgressBar
+        android:id="@+id/paginationProgressBar"
+        style="?attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_items"
