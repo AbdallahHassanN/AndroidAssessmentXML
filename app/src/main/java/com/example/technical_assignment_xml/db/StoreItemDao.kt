@@ -13,8 +13,6 @@ interface StoreItemDao {
     suspend fun upsertStoreItemsList(
         storeItemList: List<StoreItem>
     )
-
     @Query("SELECT * from StoreItem")
     suspend fun getStoreItems(): List<StoreItem>
-
 }

@@ -1,14 +1,16 @@
 package com.example.technical_assignment_xml.domain.useCases
 
 import android.content.Context
-import android.util.Log
+import android.net.http.HttpException
+import android.os.Build
+import androidx.annotation.RequiresExtension
+import com.example.technical_assignment_xml.domain.models.StoreItem
 import com.example.technical_assignment_xml.network.response.Resource
 import com.example.technical_assignment_xml.domain.repository.Repository
-import com.example.technical_assignment_xml.presentation.common.Constants.TAG
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import java.io.IOException
 import javax.inject.Inject
 
 class GetAllItemsUseCase
@@ -16,23 +18,27 @@ class GetAllItemsUseCase
     private val repo: Repository,
     @ApplicationContext private val context: Context
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun execute(
-    )  = repo.getAllItems()
-        .flatMapConcat { response ->
-            when(response)  {
-                is Resource.Error -> {
-                    Log.d(TAG,"UseCase Error ? ${response.message.toString()}")
-                    flowOf(Resource.Error(response.message.toString()))
-                }
-                is Resource.Loading -> {
-                    Log.d(TAG,"UseCase Loading ?")
-                    flowOf(Resource.Loading())
-                }
-                is Resource.Success -> {
-                    Log.d(TAG,"UseCase Success ${response.data}")
-                    flowOf(Resource.Success(response.data!!))
-                }
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun execute()
+            : Flow<Resource<List<StoreItem>>> = flow {
+        try {
+            emit(Resource.Loading())
+            val response = repo.getAllItems()
+            repo.saveItems(response)
+            emit(Resource.Success(response))
+        } catch (e: HttpException) {
+            emit(Resource.Error("An unexpected error occurred"))
+        } catch (e: IOException) {
+            if (repo.getItems().isNotEmpty()) {
+                emit(Resource.Success(repo.getItems()))
+            } else {
+                emit(
+                    Resource.Error(
+                        "No internet connection and No cached data." +
+                                " Please connect to the internet"
+                    )
+                )
             }
         }
+    }
 }
