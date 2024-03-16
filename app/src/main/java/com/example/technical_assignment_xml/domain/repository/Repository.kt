@@ -5,10 +5,10 @@ import com.example.technical_assignment_xml.domain.models.StoreItem
 
 interface Repository {
 
-    suspend fun getAllItems()
+    suspend fun getAllItemsFromApi()
             : List<StoreItem>
 
-    suspend fun saveItems(storeItemList: List<StoreItem>)
-    suspend fun getItems()
+    suspend fun saveItemsToDb(storeItemList: List<StoreItem>)
+    suspend fun getAllItemsFromDb()
             : List<StoreItem>
 }

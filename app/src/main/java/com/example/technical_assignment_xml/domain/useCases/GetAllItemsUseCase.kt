@@ -23,14 +23,14 @@ class GetAllItemsUseCase
             : Flow<Resource<List<StoreItem>>> = flow {
         try {
             emit(Resource.Loading())
-            val response = repo.getAllItems()
-            repo.saveItems(response)
+            val response = repo.getAllItemsFromApi()
+            repo.saveItemsToDb(response)
             emit(Resource.Success(response))
         } catch (e: HttpException) {
             emit(Resource.Error("An unexpected error occurred"))
         } catch (e: IOException) {
-            if (repo.getItems().isNotEmpty()) {
-                emit(Resource.Success(repo.getItems()))
+            if (repo.getAllItemsFromDb().isNotEmpty()) {
+                emit(Resource.Success(repo.getAllItemsFromDb()))
             } else {
                 emit(
                     Resource.Error(

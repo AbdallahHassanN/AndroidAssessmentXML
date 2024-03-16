@@ -11,14 +11,14 @@ class RepositoryImpl(
     private val appContext: Context,
     private val dao: StoreItemDao
 ) : Repository {
-    override suspend fun getAllItems()
+    override suspend fun getAllItemsFromApi()
             : List<StoreItem> {
         return shopService.getAllItems()
     }
-    override suspend fun saveItems(storeItemList: List<StoreItem>) {
+    override suspend fun saveItemsToDb(storeItemList: List<StoreItem>) {
         dao.upsertStoreItemsList(storeItemList)
     }
-    override suspend fun getItems()
+    override suspend fun getAllItemsFromDb()
             : List<StoreItem> {
         return dao.getStoreItems()
     }
